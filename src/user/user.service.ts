@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { UserCreateDto } from './dto/user.create.dto';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
+import { UserUpdateDto } from './dto/user.update.dto';
+import { UserPasswordDto } from './dto/user.password.dto';
 
 @Injectable()
 export class UserService {
@@ -14,6 +16,11 @@ export class UserService {
 
   async findAll(): Promise<User[]> {
     return this.userRepository.find();
+  }
+
+  async getById(id: number){
+    return this.userRepository.findOneBy({id: id});
+    
   }
 
   async findOne(username: string): Promise<User | undefined> {
@@ -44,6 +51,50 @@ export class UserService {
 
     })
 
+  }
+
+  async update(id: number, UserUpdateDto){
+    return this.userRepository
+    .update(id, UserUpdateDto)
+    .then((result) => {
+      return <ResultDto>{
+        status:true,
+        message:'Success!'
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      return <ResultDto>{
+        status:false,
+        message:"Coudn't update user"
+        
+      };
+    }) 
+  }
+
+  async updatePassword(id: number,data: UserPasswordDto){
+    const password = bcrypt.hashSync(data.password, 8);
+    return this.userRepository.update(id, {
+      password: password,
+    })
+    .then((result) => {
+      return <ResultDto>{
+        status:true,
+        message:'Sucesso!'
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      return <ResultDto>{
+        status:false,
+        message:'Deu Ruim'
+        
+      };
+    }) 
+  }
+
+  async remove(id: number){
+    return this.userRepository.delete(id)
   }
   
  
