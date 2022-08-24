@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Requirement } from 'src/requirement/requirement.entity';
+
 
 @Entity()
 export class User {
@@ -22,4 +24,7 @@ export class User {
 
   @Column('int')
   type: number;
+
+  @OneToMany(() => Requirement, requirement => requirement.user)
+  requirement: Requirement[];
 }

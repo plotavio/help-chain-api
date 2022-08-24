@@ -27,4 +27,9 @@ export class AuthService {
           access_token: token
         };
       }
+
+      async getPayload(hash: string) {
+        const payload = await this.jwtService.decode(hash);
+        return payload;
+      }
 }
