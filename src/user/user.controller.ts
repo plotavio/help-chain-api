@@ -37,16 +37,19 @@ export class UserController {
     return this.authService.login(req.user);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
    async update(@Param('id') id: number, @Body() updateUserDto: UserUpdateDto): Promise<ResultDto> {
    return this.userService.update(id, updateUserDto);
    }
 
+   @UseGuards(JwtAuthGuard)
    @Put('pass/:id')
    async updatePassword(@Param('id') id: number, @Body() updatePasswordDto: UserPasswordDto): Promise<ResultDto> {
    return this.userService.updatePassword(id, updatePasswordDto);
    }
 
+   @UseGuards(JwtAuthGuard)
    @Delete(':id')
    async remove(@Param('id') id: number) {
    return this.userService.remove(id);

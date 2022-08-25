@@ -1,5 +1,6 @@
+import { ReqResponse } from 'src/reqResponse/reqResponse.entity';
 import { User } from 'src/user/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
 
 @Entity()
 export class Requirement {
@@ -23,6 +24,10 @@ export class Requirement {
 
   @Column('datetime')
   endTime: Date;
+
+  @OneToOne(() => ReqResponse)
+    @JoinColumn()
+    reqResponse: ReqResponse
 
   @ManyToOne(() => User, user => user.requirement)
     user: User;

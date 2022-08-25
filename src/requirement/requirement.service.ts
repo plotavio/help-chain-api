@@ -5,6 +5,9 @@ import { Requirement } from './requirement.entity';
 import { RequirementCreateDto } from './dto/requirement.create.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { UserService } from 'src/user/user.service';
+import { error } from 'console';
+import { ReqResponseCreateDto } from 'src/reqResponse/dto/reqResponse.create.dto';
+import { ReqResponseService } from 'src/reqResponse/reqResponse.service';
 
 
 @Injectable()
@@ -13,7 +16,8 @@ export class RequirementService {
     @Inject('REQUIREMENT_REPOSITORY')
     private requirementRepository: Repository<Requirement>,
     private authService: AuthService,
-    private userService: UserService    
+    private userService: UserService,
+    private reqResponseService: ReqResponseService    
   ) {}
 
   async findAll(): Promise<Requirement[]> {
@@ -65,8 +69,49 @@ export class RequirementService {
 
   }
 
+  async respondReq(id: number, data: ReqResponseCreateDto, hash: string){
+    const requirement = await this.requirementRepository.createQueryBuilder('requirement')
+    .where('requirement.id = :id',{ id: id })
+    .andWhere('requirement.reqResponseId is not null')
+    .getOne()
+    if(requirement){
+      return <ResultDto>{
+        status:false,
+        message:'Requirement has already been responded'}      
+    }
+    const payload = await this.authService.getPayload(hash);
+    const user = await this.userService.getById(Number(payload.sub)); 
+    const response = await this.reqResponseService.create(data, user.username)
+    return this.requirementRepository.update(id, {
+       reqResponse: response,
+     })
+     .then((result) => {
+       return <ResultDto>{
+         status:true,
+         message:'Sucesso!'
+       }
+     })
+     .catch((error) => {
+       console.log(error);
+       return <ResultDto>{
+         status:false,
+         message:'Deu Ruim'
+        
+       };
+     }) 
+  }
+
   async closeReq(id: number){
     const endTime = new Date();
+    const requirement = await this.requirementRepository.createQueryBuilder('requirement')
+    .where('requirement.id = :id',{ id: id })
+    .andWhere('requirement.endTime is not null')
+    .getOne()
+    if(requirement){
+      return <ResultDto>{
+        status:false,
+        message:'Requirement is already closed'}
+    }
     return this.requirementRepository.update(id, {
       endTime: endTime,
     })
@@ -85,6 +130,8 @@ export class RequirementService {
       };
     }) 
   }
+
+  
 
   async remove(id: number){
     return this.requirementRepository.delete(id)
