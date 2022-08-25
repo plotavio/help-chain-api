@@ -27,7 +27,12 @@ export class RequirementService {
   async findMany(hash: string): Promise<Requirement[]> {
     const payload = await this.authService.getPayload(hash)
     const user = await this.userService.getById(Number(payload.sub))
-    return this.requirementRepository.findBy({type: user.type})
+    // return this.requirementRepository.findBy({type: user.type, sector: user.department, endTime: null})
+    return this.requirementRepository.createQueryBuilder('requirement')
+    .where('requirement.type = :type',{ type: user.type })
+    .andWhere('requirement.sector = :department',{ department: user.department })
+    .andWhere('requirement.endTime is null')
+    .getMany()
   }
 
   async create(data: RequirementCreateDto, hash: string): Promise<ResultDto>{
